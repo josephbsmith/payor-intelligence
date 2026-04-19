@@ -33,7 +33,7 @@ th, td { padding:8px; border:1px solid #808080; text-align:left; }
 <div id="app"></div>
 
 <script>
-// PAYOR INTELLIGENCE PLATFORM — LIVE SCRAPING VERSION
+// PAYOR INTELLIGENCE PLATFORM — LIVE SCRAPING
 const PROXY_URL = "https://payor-proxy.onrender.com";
 
 const PAYERS = [
@@ -81,16 +81,16 @@ const STATE = {
 let FEE_DATA = {};
 let OPEN_PAY = {};
 
-// Live data fetch every page load
+// Live data fetch
 async function loadLiveData() {
   try {
     const res = await fetch(`${PROXY_URL}/live-data`);
     const data = await res.json();
     FEE_DATA = data.feeSchedule || {};
     OPEN_PAY = data.openPayments || {};
-    console.log("✅ Live CMS and Open Payments data loaded");
+    console.log("Live data loaded");
   } catch(e) {
-    console.error("Live data fetch failed", e);
+    console.error("Live data failed", e);
   }
 }
 
