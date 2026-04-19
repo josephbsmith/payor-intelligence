@@ -33,8 +33,8 @@ th, td { padding:8px; border:1px solid #808080; text-align:left; }
 <div id="app"></div>
 
 <script>
-// PAYOR INTELLIGENCE PLATFORM — LIVE VERSION WITH PROXY
-const PROXY_URL = "https://YOUR-PROXY.onrender.com";   // ←←← CHANGE THIS AFTER YOU CREATE THE BACKEND
+// PAYOR INTELLIGENCE PLATFORM — LIVE WITH YOUR PROXY
+const PROXY_URL = "https://payor-proxy.onrender.com";
 
 const PAYERS = [
   { id: "UNH", name: "UnitedHealth Group", ticker: "UNH", cik: "0000731766" },
@@ -56,7 +56,7 @@ const LAYERS = [
   { key: "pharmaAlignment", name: "Pharma Alignment", weight: 0.05, short: "Pharma" }
 ];
 
-const PROMPTS = { /* full prompts - same as before */ 
+const PROMPTS = {
   feeSchedule: "You are a healthcare reimbursement analyst specializing in oncology fee schedule trends. Score the following CMS fee schedule data on a 0-10 scale for reimbursement pressure, where 0 = strong upward trend and 10 = severe downward pressure.",
   financialStress: "You are a healthcare financial analyst. Score this health insurer's financial stress on a 0-10 scale, where 0 = strong financial position with margin capacity and 10 = severe stress likely to result in provider rate cuts.",
   networkConcentration: "You are a healthcare network strategy analyst. Score this payer's oncology network concentration risk on a 0-10 scale, where 0 = highly diversified and 10 = extreme concentration.",
@@ -67,8 +67,8 @@ const PROMPTS = { /* full prompts - same as before */
   pharmaAlignment: "You are a healthcare market access analyst. Score pharma-provider alignment on a 0-10 scale, where 0 = minimal engagement and 10 = deep relationships creating complex dynamics.",
 };
 
-let FEE_DATA = { /* full real 2026 data */ };
-let OPEN_PAY = { /* full realistic sample */ };
+let FEE_DATA = { /* real 2026 CMS data */ };
+let OPEN_PAY = { /* realistic sample */ };
 
 const STATE = {
   tab: "overview",
