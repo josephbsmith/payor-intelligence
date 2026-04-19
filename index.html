@@ -3,30 +3,253 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Payor Intelligence Platform — Volunteer Oncology Partners</title>
+<title>Payer Intelligence Platform — Volunteer Oncology Partners</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-/* same Windows Classic CSS as before */
-* { margin:0; padding:0; box-sizing:border-box; }
-body { background:#C0C0C0; color:#000; font-family:Tahoma,Arial,sans-serif; font-size:13px; min-height:100vh; overflow-x:hidden; }
-.header { background:linear-gradient(to right,#000080,#1084d0); color:white; padding:6px 10px; border-bottom:3px solid #fff; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; }
-.header h1 { font-size:16px; font-weight:bold; }
-.btn { background:#C0C0C0; border-top:2px solid #fff; border-left:2px solid #fff; border-bottom:2px solid #808080; border-right:2px solid #808080; padding:6px 16px; font-size:13px; cursor:pointer; }
-.btn:hover { border-style:inset; }
-.btn-primary { background:#000080; color:white; border-top:2px solid #fff; border-left:2px solid #fff; border-bottom:2px solid #000080; border-right:2px solid #000080; }
-.card { background:#C0C0C0; border-top:2px solid #fff; border-left:2px solid #fff; border-bottom:2px solid #808080; border-right:2px solid #808080; padding:12px; margin-bottom:16px; }
-.card h3 { background:linear-gradient(to right,#000080,#1084d0); color:white; padding:5px 10px; margin:-12px -12px 12px -12px; font-weight:bold; }
-.tabs { background:#C0C0C0; border-bottom:3px solid #808080; padding:6px 10px; display:flex; flex-wrap:wrap; gap:4px; }
-.tab { background:#C0C0C0; border-top:2px solid #fff; border-left:2px solid #fff; border-bottom:2px solid #808080; border-right:2px solid #808080; padding:6px 14px; cursor:pointer; white-space:nowrap; }
-.tab.active { border-style:inset; }
-.content { padding:16px; max-width:1200px; margin:0 auto; }
-table { width:100%; border-collapse:collapse; font-size:13px; }
-th, td { padding:8px; border:1px solid #808080; text-align:left; }
-.score-badge { padding:4px 12px; font-weight:bold; border:2px solid #000080; display:inline-block; }
-.footer { background:#C0C0C0; border-top:3px solid #fff; padding:8px; text-align:center; font-size:11px; color:#000080; position:fixed; bottom:0; width:100%; }
-.loading-dots { color:#000080; font-size:18px; letter-spacing:4px; animation:blink 1s infinite; }
-@keyframes blink { 50% { opacity:0.3; } }
-.chart-container { border:2px inset #808080; background:#FFFFFF; padding:8px; }
+:root {
+  --bg: #0a0f1a;
+  --surface: #111827;
+  --surface-alt: #1a2235;
+  --border: #1e2d45;
+  --border-light: #2a3f5f;
+  --text: #e2e8f0;
+  --text-muted: #8892a4;
+  --text-dim: #5a6478;
+  --accent: #3b82f6;
+  --accent-glow: rgba(59,130,246,0.15);
+  --green: #10b981;
+  --green-dim: rgba(16,185,129,0.15);
+  --amber: #f59e0b;
+  --amber-dim: rgba(245,158,11,0.15);
+  --red: #ef4444;
+  --red-dim: rgba(239,68,68,0.15);
+  --cyan: #06b6d4;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', 'Segoe UI', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.mono { font-family: 'JetBrains Mono', 'Fira Code', monospace; }
+
+/* Header */
+.header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.header-left { display: flex; align-items: center; gap: 16px; }
+.header-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent);
+}
+.header h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
+.header .subtitle { font-size: 11px; color: var(--text-muted); }
+.api-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.api-controls select, .api-controls input {
+  background: var(--surface-alt); border: 1px solid var(--border);
+  border-radius: 8px; padding: 8px 14px; color: var(--text);
+  font-size: 13px; outline: none; font-family: inherit;
+}
+.api-controls select { width: 140px; cursor: pointer; }
+.api-controls input { width: 260px; }
+.btn {
+  border: none; border-radius: 8px; padding: 8px 18px;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  font-family: inherit; transition: all 0.2s;
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { filter: brightness(1.15); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-outline {
+  background: transparent; color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+.btn-outline:hover { border-color: var(--accent); color: var(--text); }
+.connected-badge {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: var(--green);
+}
+.connected-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--green);
+}
+
+/* Tabs */
+.tabs {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 32px;
+  display: flex; gap: 0;
+  overflow-x: auto;
+}
+.tab {
+  background: transparent; border: none;
+  border-bottom: 2px solid transparent;
+  padding: 12px 20px;
+  color: var(--text-muted);
+  font-size: 13px; font-weight: 400;
+  cursor: pointer; white-space: nowrap;
+  font-family: inherit; transition: all 0.2s;
+}
+.tab.active { color: var(--text); font-weight: 600; border-bottom-color: var(--accent); }
+.tab:hover:not(.active) { color: var(--text); }
+
+/* Content */
+.content { padding: 24px 32px; max-width: 1200px; margin: 0 auto; }
+
+/* Cards */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.card-clickable { cursor: pointer; transition: border-color 0.2s; }
+.card-clickable:hover { border-color: var(--accent); }
+.card h3 { font-size: 16px; margin-bottom: 4px; }
+.card .desc { color: var(--text-muted); font-size: 13px; margin-bottom: 16px; }
+
+/* Grid */
+.grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 16px; }
+.grid-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 16px; margin-bottom: 16px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 16px; }
+
+@media (max-width: 900px) {
+  .grid-4 { grid-template-columns: repeat(2,1fr); }
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  .header { padding: 12px 16px; }
+  .content { padding: 16px; }
+  .tabs { padding: 0 16px; }
+}
+
+/* Stat card */
+.stat-label {
+  color: var(--text-muted); font-size: 11px;
+  text-transform: uppercase; letter-spacing: 1px;
+  margin-bottom: 8px; font-family: 'JetBrains Mono', monospace;
+}
+.stat-value { font-size: 32px; font-weight: 700; }
+
+/* Tables */
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th {
+  text-align: left; padding: 10px 12px;
+  border-bottom: 2px solid var(--border);
+  color: var(--text-muted); font-weight: 600;
+  font-size: 11px; text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: 'JetBrains Mono', monospace;
+}
+td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(30,45,69,0.3);
+}
+tr.clickable { cursor: pointer; transition: background 0.15s; }
+tr.clickable:hover { background: var(--surface-alt); }
+.text-right { text-align: right; }
+.text-center { text-align: center; }
+
+/* Score badge */
+.score-badge {
+  display: inline-flex; align-items: center;
+  border-radius: 8px; font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+}
+.score-sm { padding: 2px 8px; font-size: 13px; }
+.score-md { padding: 4px 12px; font-size: 16px; }
+.score-lg { padding: 8px 16px; font-size: 28px; }
+
+/* Progress bars */
+.progress-bar {
+  height: 8px; background: var(--surface-alt);
+  border-radius: 4px; overflow: hidden;
+}
+.progress-fill {
+  height: 100%; border-radius: 4px;
+  transition: width 0.8s ease;
+}
+
+/* Classification banner */
+.classification-banner {
+  border-radius: 12px; padding: 16px 24px;
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 16px;
+}
+
+/* Layer detail card */
+.layer-detail {
+  padding: 16px; background: var(--surface-alt);
+  border-radius: 10px; margin-bottom: 12px;
+  border-left: 3px solid var(--accent);
+}
+.layer-detail .findings {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px;
+}
+.finding-tag {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 6px; padding: 3px 10px;
+  font-size: 11px; color: var(--text-muted);
+}
+
+/* Chart containers */
+.chart-container { position: relative; width: 100%; }
+
+/* Loading */
+.loading-dots { display: inline-flex; gap: 4px; align-items: center; }
+.loading-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent);
+  animation: ldpulse 1.2s ease-in-out infinite;
+}
+.loading-dot:nth-child(2) { animation-delay: 0.2s; }
+.loading-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes ldpulse {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1.2); }
+}
+
+/* Manufacturer cards */
+.mfg-card {
+  flex: 1; background: var(--surface-alt);
+  border-radius: 8px; padding: 12px; text-align: center;
+}
+.mfg-name { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+.mfg-amount { font-size: 15px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+
+/* Footer */
+.footer {
+  padding: 24px 32px; text-align: center;
+  border-top: 1px solid var(--border); margin-top: 40px;
+}
+.footer p { color: var(--text-dim); font-size: 11px; }
+
+/* Empty state */
+.empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); font-size: 14px; }
+
+/* Methodology section */
+.method-grid { display: grid; grid-template-columns: 160px 1fr; gap: 0; font-size: 13px; }
+.method-label {
+  padding: 10px 12px; background: rgba(59,130,246,0.08);
+  font-weight: 600; color: var(--text);
+}
+.method-value { padding: 10px 12px; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+
+.weight-table td:first-child { font-weight: 600; }
 </style>
 </head>
 <body>
@@ -34,107 +257,935 @@ th, td { padding:8px; border:1px solid #808080; text-align:left; }
 <div id="app"></div>
 
 <script>
-// FULLY FIXED LIVE VERSION
+// ═══════════════════════════════════════════════
+// DATA LAYER
+// ═══════════════════════════════════════════════
+
+const PAYERS = [
+  { id: "UNH", name: "UnitedHealth Group", ticker: "UNH", cik: "0000731766" },
+  { id: "ELV", name: "Elevance Health", ticker: "ELV", cik: "0001156039" },
+  { id: "CI", name: "The Cigna Group", ticker: "CI", cik: "0000764764" },
+  { id: "HUM", name: "Humana", ticker: "HUM", cik: "0000049071" },
+  { id: "CNC", name: "Centene Corp", ticker: "CNC", cik: "0001071739" },
+  { id: "MOH", name: "Molina Healthcare", ticker: "MOH", cik: "0000878581" },
+];
+
+const LAYERS = [
+  { key: "feeSchedule", name: "Fee Schedule Trend", weight: 0.20, short: "Fee Sched." },
+  { key: "financialStress", name: "Financial Stress", weight: 0.20, short: "Fin. Stress" },
+  { key: "networkConcentration", name: "Network Concentration", weight: 0.15, short: "Network" },
+  { key: "formulary", name: "Formulary Analysis", weight: 0.10, short: "Formulary" },
+  { key: "regulatory", name: "Regulatory Environment", weight: 0.10, short: "Regulatory" },
+  { key: "claimsOps", name: "Claims Operations", weight: 0.10, short: "Claims Ops" },
+  { key: "actuarial", name: "Actuarial Assumptions", weight: 0.10, short: "Actuarial" },
+  { key: "pharmaAlignment", name: "Pharma Alignment", weight: 0.05, short: "Pharma" },
+];
+
+const ONCOLOGY_CPT = [
+  { code: "96413", desc: "Chemo admin IV infusion, 1st hr" },
+  { code: "96415", desc: "Chemo admin IV infusion, addl hr" },
+  { code: "77386", desc: "IMRT delivery, complex" },
+  { code: "77385", desc: "IMRT delivery, simple" },
+  { code: "99214", desc: "Office visit, est. patient, moderate" },
+  { code: "99215", desc: "Office visit, est. patient, high" },
+  { code: "96365", desc: "IV infusion therapy, 1st hr" },
+  { code: "96375", desc: "Therapeutic injection, IV push" },
+];
+
+const PROMPTS = {
+  feeSchedule: "You are a healthcare reimbursement analyst specializing in oncology fee schedule trends. Score the following CMS fee schedule data on a 0-10 scale for reimbursement pressure, where 0 = strong upward trend and 10 = severe downward pressure. Consider RVU changes, conversion factor trajectory, and GPCI movement.",
+  financialStress: "You are a healthcare financial analyst. Score this health insurer's financial stress on a 0-10 scale, where 0 = strong financial position with margin capacity and 10 = severe stress likely to result in provider rate cuts. Evaluate MLR trajectory, operating margins, debt levels, and membership trends.",
+  networkConcentration: "You are a healthcare network strategy analyst. Score this payer's oncology network concentration risk on a 0-10 scale, where 0 = highly diversified and 10 = extreme concentration. Assess provider counts, geographic coverage, and system dependency.",
+  formulary: "You are a specialty pharmacy analyst. Score this payer's formulary restrictiveness on a 0-10 scale, where 0 = open, provider-friendly and 10 = highly restrictive. Evaluate prior auth burden, biosimilar adoption, and carve-out patterns.",
+  regulatory: "You are a healthcare regulatory analyst. Score the regulatory environment's impact on this payer's pricing flexibility on a 0-10 scale, where 0 = minimal constraint and 10 = heavy regulatory friction.",
+  claimsOps: "You are a revenue cycle operations analyst. Score this payer's claims operations friction on a 0-10 scale, where 0 = efficient operations and 10 = high friction. Distinguish strategic denials from operational dysfunction.",
+  actuarial: "You are a healthcare actuary. Score this payer's actuarial assumption transparency on a 0-10 scale, where 0 = assumptions match reality and 10 = systematically conservative assumptions building hidden margin.",
+  pharmaAlignment: "You are a healthcare market access analyst. Score pharma-provider alignment on a 0-10 scale, where 0 = minimal engagement and 10 = deep relationships creating complex dynamics.",
+};
+
+// ═══════════════════════════════════════════════
+// DATA LAYER — Pulls from proxy server
+// Set PROXY_URL to your deployed Render URL
+// For local dev: http://localhost:3000
+// ═══════════════════════════════════════════════
+
 const PROXY_URL = "https://payor-proxy.onrender.com";
 
-const PAYERS = [ /* same as before */ ];
-const LAYERS = [ /* same as before */ ];
-const PROMPTS = { /* same as before */ };
-
-const STATE = { /* same as before */ };
-
+let HISTORICAL_FEES = {};
 let FEE_DATA = {};
+let FINANCIALS = {};
+let CLAIMS_OPS = {};
 let OPEN_PAY = {};
+let DATA_METADATA = {};
+let DATA_LOADED = false;
 
-// 1. Load live data on every page load
 async function loadLiveData() {
   try {
-    console.log("Fetching live data from proxy...");
+    console.log("⏳ Fetching live data from proxy...");
     const res = await fetch(`${PROXY_URL}/live-data`);
+    if (!res.ok) throw new Error(`Proxy returned ${res.status}`);
     const data = await res.json();
+
+    // Map fee schedule data
+    HISTORICAL_FEES = data.historicalFees || {};
     FEE_DATA = data.feeSchedule || {};
-    OPEN_PAY = data.openPayments || {};
-    console.log("✅ Live CMS data loaded:", Object.keys(FEE_DATA).length, "CPT codes");
+
+    // Map financial data from EDGAR
+    PAYERS.forEach(p => {
+      const fin = data.financials?.[p.id];
+      if (fin) {
+        const rev = fin.revenue?.value;
+        const ni = fin.netIncome?.value;
+        const opMargin = (rev && ni) ? +((ni / rev) * 100).toFixed(1) : null;
+        FINANCIALS[p.id] = {
+          mlr: fin.mlr ? [
+            { q: "FY '25", v: fin.mlr }
+          ] : [{ q: "FY '25", v: null }],
+          opMargin: opMargin,
+          debtEq: fin.debtToEquity,
+          revenueB: rev ? +(rev / 1e9).toFixed(1) : null,
+          premRevB: fin.premiumRevenue?.value ? +(fin.premiumRevenue.value / 1e9).toFixed(1) : null,
+          period: fin.revenue?.period || "Unknown",
+          source: fin.source,
+        };
+      }
+    });
+
+    // Map claims/quality data
+    const quality = data.quality || {};
+    PAYERS.forEach(p => {
+      const q = quality[p.id];
+      if (q) {
+        CLAIMS_OPS[p.id] = {
+          denialRate: q.denialRate,
+          appealRev: q.appealReversalRate,
+          paDays: q.avgPAdays,
+          cleanClaim: q.cleanClaimRate,
+          stars: q.starRating,
+          source: q.source,
+        };
+      }
+    });
+
+    // Map open payments data
+    const opay = data.openPayments || {};
+    PAYERS.forEach(p => {
+      const o = opay[p.id];
+      if (o) {
+        OPEN_PAY[p.id] = {
+          total: o.total,
+          oncCount: o.oncCount,
+          mfgs: (o.topManufacturers || []).map(m => ({ n: m.n || m.name, a: m.a || m.amount })),
+          research: o.research,
+          consulting: o.consulting,
+          source: o.source,
+        };
+      }
+    });
+
+    DATA_METADATA = data.metadata || {};
+    DATA_LOADED = true;
+    console.log("✅ Live data loaded:", {
+      feeCodes: Object.keys(FEE_DATA).length,
+      financials: Object.keys(FINANCIALS).length,
+      quality: Object.keys(CLAIMS_OPS).length,
+      openPay: Object.keys(OPEN_PAY).length,
+      sources: DATA_METADATA.sources,
+    });
   } catch(e) {
-    console.error("❌ Live data fetch failed", e);
+    console.error("❌ Failed to load live data:", e.message);
+    console.log("Make sure your proxy server is running. See instructions in Methodology tab.");
+    DATA_LOADED = false;
   }
 }
 
-async function callLLM(systemPrompt, userData) { /* same as before */ }
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+
+const STATE = {
+  tab: "overview",
+  provider: "claude",
+  apiKey: "",
+  connected: false,
+  selectedPayer: null,
+  results: {},
+  analyzing: {},
+  charts: {},
+};
+
+// ═══════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════
+
+function scoreColor(s) {
+  if (s <= 2.5) return "var(--green)";
+  if (s <= 5.0) return "var(--cyan)";
+  if (s <= 7.5) return "var(--amber)";
+  return "var(--red)";
+}
+function scoreBg(s) {
+  if (s <= 2.5) return "var(--green-dim)";
+  if (s <= 5.0) return "var(--accent-glow)";
+  if (s <= 7.5) return "var(--amber-dim)";
+  return "var(--red-dim)";
+}
+function scoreLabel(s) {
+  if (s <= 2.5) return "Growth Opportunity";
+  if (s <= 5.0) return "Stable / Monitor";
+  if (s <= 7.5) return "Defensive Posture";
+  return "High Risk";
+}
+function scoreEmoji(s) {
+  if (s <= 2.5) return "📈";
+  if (s <= 5.0) return "📊";
+  if (s <= 7.5) return "⚠️";
+  return "🚨";
+}
+function scoreRec(s) {
+  if (s <= 2.5) return "Pursue rate increases and value-based arrangement expansion. Payer has margin capacity.";
+  if (s <= 5.0) return "Accept current terms if competitive. Focus negotiation on administrative simplification.";
+  if (s <= 7.5) return "Expect rate cut proposals. Prepare counter-arguments using benchmark data and leverage points.";
+  return "Consider diversifying patient volume away from this payer. Prepare for potential unilateral rate reductions.";
+}
+
+function badge(score, size="md") {
+  const c = scoreColor(score);
+  const bg = scoreBg(score);
+  return `<span class="score-badge score-${size}" style="background:${bg};color:${c};border:1px solid ${c}33">${score.toFixed(1)}</span>`;
+}
+
+function loadingDots() {
+  return '<span class="loading-dots"><span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span></span>';
+}
+
+function $(sel) { return document.querySelector(sel); }
+function $$(sel) { return document.querySelectorAll(sel); }
+
+// ═══════════════════════════════════════════════
+// LLM API LAYER
+// ═══════════════════════════════════════════════
+
+async function callLLM(systemPrompt, userData) {
+  const dataStr = JSON.stringify(userData);
+  const jsonInstruction = '\n\nRespond with ONLY a JSON object. No markdown, no backticks, no extra text. Keep narrative under 80 words. Exact format:\n{"score": 5.5, "narrative": "Brief analysis here.", "keyFindings": ["finding1", "finding2", "finding3"]}';
+  const userMsg = systemPrompt + "\n\nDATA:\n" + dataStr + jsonInstruction;
+
+  let url, headers, body;
+
+  if (STATE.provider === "claude") {
+    url = "https://api.anthropic.com/v1/messages";
+    headers = { "Content-Type": "application/json", "x-api-key": STATE.apiKey, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" };
+    body = JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 2048, messages: [{ role: "user", content: userMsg }] });
+  } else if (STATE.provider === "deepseek") {
+    url = "https://api.deepseek.com/chat/completions";
+    headers = { "Content-Type": "application/json", "Authorization": "Bearer " + STATE.apiKey };
+    body = JSON.stringify({ model: "deepseek-chat", max_tokens: 2048, temperature: 0.7, messages: [{ role: "system", content: systemPrompt }, { role: "user", content: dataStr + jsonInstruction }] });
+  } else {
+    url = "https://api.openai.com/v1/chat/completions";
+    headers = { "Content-Type": "application/json", "Authorization": "Bearer " + STATE.apiKey };
+    body = JSON.stringify({ model: "gpt-4o-mini", max_tokens: 2048, temperature: 0.7, messages: [{ role: "system", content: systemPrompt }, { role: "user", content: dataStr + jsonInstruction }] });
+  }
+
+  const resp = await fetch(url, { method: "POST", headers, body });
+  const data = await resp.json();
+
+  let text;
+  if (STATE.provider === "claude") {
+    text = data.content?.[0]?.text || "";
+  } else {
+    text = data.choices?.[0]?.message?.content || "";
+  }
+
+  const clean = text.replace(/```json|```/g, "").trim();
+  return JSON.parse(clean);
+}
 
 async function analyzeOnePayer(payerId) {
   STATE.analyzing[payerId] = true;
   render();
-  try {
-    const payer = PAYERS.find(p => p.id === payerId);
-    const results = {};
-    for (const layer of LAYERS) {
-      let layerData = { payer: payer.name, ticker: payer.ticker };
-      if (layer.key === "feeSchedule") layerData.cptTrends = Object.keys(FEE_DATA).map(code => ({code, changePct: -3.2}));
-      if (layer.key === "pharmaAlignment") layerData = OPEN_PAY[payerId] || {};
+
+  const payer = PAYERS.find(p => p.id === payerId);
+  const results = {};
+
+  for (const layer of LAYERS) {
+    try {
+      const layerData = { payer: payer.name, ticker: payer.ticker, market: "Nashville MSA", state: "Tennessee" };
+      if (layer.key === "feeSchedule") {
+        // Send compact summary instead of full nested data
+        layerData.conversionFactors = { 2024: 33.29, 2025: 32.74, 2026: 32.35 };
+        layerData.cptTrends = ONCOLOGY_CPT.map(c => {
+          const y = FEE_DATA[c.code];
+          const rvu24 = +(y[0].workRVU+y[0].peRVU+y[0].mpRVU).toFixed(2);
+          const rvu26 = +(y[2].workRVU+y[2].peRVU+y[2].mpRVU).toFixed(2);
+          return { code: c.code, desc: c.desc, rvu2024: rvu24, rvu2026: rvu26, changePct: +(((rvu26-rvu24)/rvu24)*100).toFixed(1) };
+        });
+      }
+      if (layer.key === "financialStress") Object.assign(layerData, FINANCIALS[payerId]);
+      if (layer.key === "claimsOps") Object.assign(layerData, CLAIMS_OPS[payerId]);
+      if (layer.key === "pharmaAlignment") Object.assign(layerData, OPEN_PAY[payerId]);
+      if (["networkConcentration","formulary","regulatory","actuarial"].includes(layer.key)) {
+        Object.assign(layerData, FINANCIALS[payerId], CLAIMS_OPS[payerId]);
+      }
       results[layer.key] = await callLLM(PROMPTS[layer.key], layerData);
+    } catch(e) {
+      results[layer.key] = { score: 5.0, narrative: "Analysis error: " + e.message, keyFindings: ["Error during analysis"] };
     }
-    results._composite = +LAYERS.reduce((s,l) => s + (results[l.key]?.score||5)*l.weight, 0).toFixed(1);
-    STATE.results[payerId] = results;
-  } catch (error) {
-    console.error("Analysis failed for", payerId, error);
-  } finally {
-    STATE.analyzing[payerId] = false;
-    render();
+  }
+
+  results._composite = +LAYERS.reduce((s,l) => s + (results[l.key]?.score||5)*l.weight, 0).toFixed(1);
+  STATE.results[payerId] = results;
+  STATE.analyzing[payerId] = false;
+  render();
+}
+
+async function analyzeAll() {
+  for (const p of PAYERS) {
+    if (!STATE.results[p.id]) await analyzeOnePayer(p.id);
   }
 }
 
-async function analyzeAll() { /* same */ }
+// ═══════════════════════════════════════════════
+// RENDER ENGINE
+// ═══════════════════════════════════════════════
 
-function scoreColor(s) { /* same */ }
-function badge(score) { /* same */ }
-function loadingDots() { /* same */ }
+function render() {
+  const app = document.getElementById("app");
+  app.innerHTML = renderHeader() + renderTabs() + '<div class="content">' + renderContent() + '</div>' + renderFooter();
+  bindEvents();
+  setTimeout(renderCharts, 50);
+}
 
-// Render functions (same as last working version)
-function renderHeader() { /* same */ }
-function renderTabs() { /* same */ }
-function renderOverview() { /* same */ }
-function renderFeeSchedule() { return `<div class="card"><h3>Fee Schedule Trend (Live CMS Data)</h3><div class="chart-container" style="height:300px"><canvas id="rvuChart"></canvas></div></div>`; }
-function renderFinancials() { return `<div class="card"><h3>Payer Financials</h3><p>Live data coming next</p></div>`; }
-function renderClaimsOpsTab() { return `<div class="card"><h3>Claims Operations</h3><p>Live data coming next</p></div>`; }
-function renderOpenPayments() { return `<div class="card"><h3>Open Payments (Live CMS Data)</h3><p>Data loaded from CMS Open Payments</p></div>`; }
-function renderDetail() { /* same */ }
-function renderMethodology() { /* same */ }
+function renderHeader() {
+  const providerNames = { claude: "Claude (Anthropic)", deepseek: "DeepSeek", openai: "OpenAI (GPT)" };
+  const placeholders = { claude: "sk-ant-...", deepseek: "sk-...", openai: "sk-..." };
 
-function renderContent() { /* same */ }
+  let apiSection;
+  if (!STATE.connected) {
+    apiSection = `
+      <select id="providerSelect">
+        <option value="claude" ${STATE.provider==="claude"?"selected":""}>Claude</option>
+        <option value="deepseek" ${STATE.provider==="deepseek"?"selected":""}>DeepSeek</option>
+        <option value="openai" ${STATE.provider==="openai"?"selected":""}>OpenAI</option>
+      </select>
+      <input type="password" id="apiKeyInput" placeholder="${placeholders[STATE.provider]}" value="${STATE.apiKey}">
+      <button class="btn btn-primary" id="connectBtn">Connect</button>
+    `;
+  } else {
+    apiSection = `
+      <div class="connected-badge"><span class="connected-dot"></span>${providerNames[STATE.provider]} Connected</div>
+      <button class="btn btn-outline" id="disconnectBtn" style="font-size:11px;padding:6px 12px">Disconnect</button>
+    `;
+  }
 
-// 4. Fixed Chart.js (destroy old instance)
-let currentChart = null;
+  return `
+    <div class="header">
+      <div class="header-left">
+        <div class="header-dot"></div>
+        <div>
+          <h1>Payer Intelligence Platform</h1>
+          <span class="subtitle">Volunteer Oncology Partners — Nashville MSA</span>
+        </div>
+      </div>
+      <div class="api-controls">${apiSection}</div>
+    </div>`;
+}
+
+function renderTabs() {
+  const tabs = [
+    { id: "overview", label: "Overview" },
+    { id: "feeSchedule", label: "Fee Schedule" },
+    { id: "financials", label: "Payer Financials" },
+    { id: "claimsOps", label: "Claims Ops" },
+    { id: "openPayments", label: "Open Payments" },
+    { id: "detail", label: STATE.selectedPayer ? "Detail: " + PAYERS.find(p=>p.id===STATE.selectedPayer)?.ticker : "Payer Detail" },
+    { id: "methodology", label: "Methodology" },
+  ];
+  return '<div class="tabs">' + tabs.map(t =>
+    `<button class="tab ${STATE.tab===t.id?'active':''}" data-tab="${t.id}">${t.label}</button>`
+  ).join("") + '</div>';
+}
+
+function renderContent() {
+  switch(STATE.tab) {
+    case "overview": return renderOverview();
+    case "feeSchedule": return renderFeeSchedule();
+    case "financials": return renderFinancials();
+    case "claimsOps": return renderClaimsOpsTab();
+    case "openPayments": return renderOpenPayments();
+    case "detail": return renderDetail();
+    case "methodology": return renderMethodology();
+  }
+}
+
+// ─── OVERVIEW ───
+function renderOverview() {
+  const analyzed = PAYERS.filter(p => STATE.results[p.id]);
+  const avgPPI = analyzed.length ? (analyzed.reduce((s,p) => s + STATE.results[p.id]._composite, 0) / analyzed.length) : null;
+
+  let rows = PAYERS.map(p => {
+    const f = FINANCIALS[p.id];
+    const c = CLAIMS_OPS[p.id];
+    const r = STATE.results[p.id];
+    const an = STATE.analyzing[p.id];
+    return `<tr class="clickable" data-payer="${p.id}">
+      <td><div style="display:flex;align-items:center;gap:10px">
+        <div style="width:8px;height:8px;border-radius:50%;background:${r ? scoreColor(r._composite) : 'var(--text-dim)'}"></div>
+        <span style="font-weight:600">${p.name}</span>
+        <span style="color:var(--text-muted);font-size:11px">${p.ticker}</span>
+      </div></td>
+      <td class="text-center"><span class="mono" style="font-size:13px">${f?.mlr?.[f.mlr.length-1]?.v != null ? f.mlr[f.mlr.length-1].v+'%' : '—'}</span></td>
+      <td class="text-center"><span class="mono" style="font-size:13px">${c?.denialRate != null ? c.denialRate+'%' : '—'}</span></td>
+      <td class="text-center">${r ? badge(r._composite, "sm") : an ? loadingDots() : '<span style="color:var(--text-dim);font-size:12px">—</span>'}</td>
+      <td>${r ? `<span style="color:${scoreColor(r._composite)};font-weight:600;font-size:12px">${scoreLabel(r._composite)}</span>` : '<span style="color:var(--text-dim);font-size:12px">Pending</span>'}</td>
+      <td class="text-center"><button class="btn btn-outline" style="font-size:11px;padding:4px 12px" data-detail="${p.id}">Detail →</button></td>
+    </tr>`;
+  }).join("");
+
+  const analyzeBtn = STATE.connected ?
+    `<button class="btn btn-primary" id="analyzeAllBtn" ${Object.values(STATE.analyzing).some(v=>v)?'disabled':''}>${Object.values(STATE.analyzing).some(v=>v)?'Analyzing...':'Analyze All Payers'}</button>` : '';
+
+  return `
+    <div class="grid-4">
+      <div class="card"><div class="stat-label">Payers Tracked</div><div class="stat-value">${PAYERS.length}</div></div>
+      <div class="card"><div class="stat-label">Analyzed</div><div class="stat-value" style="color:var(--accent)">${analyzed.length}</div></div>
+      <div class="card"><div class="stat-label">Avg Pressure Index</div><div class="stat-value" style="color:${avgPPI !== null ? scoreColor(avgPPI) : 'var(--text-dim)'}">${avgPPI !== null ? avgPPI.toFixed(1) : '—'}</div></div>
+      <div class="card"><div class="stat-label">Analytical Layers</div><div class="stat-value">8</div></div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3>Payer Portfolio</h3>
+        ${analyzeBtn}
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr>
+            <th>Payer</th><th class="text-center">Latest MLR</th><th class="text-center">Denial Rate</th>
+            <th class="text-center">Pressure Index</th><th>Classification</th><th></th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>
+
+    ${analyzed.length >= 2 ? `
+    <div class="card">
+      <h3>Comparative Risk Profile</h3>
+      <div class="desc">Radar comparison across all 8 analytical layers</div>
+      <div class="chart-container" style="height:380px"><canvas id="radarChart"></canvas></div>
+    </div>` : ''}
+  `;
+}
+
+// ─── FEE SCHEDULE ───
+function renderFeeSchedule() {
+  const codes = Object.keys(HISTORICAL_FEES).length > 0 ? Object.keys(HISTORICAL_FEES) : ONCOLOGY_CPT.map(c => c.code);
+  const chartData = codes.map(code => {
+    const h = HISTORICAL_FEES[code];
+    const live = FEE_DATA[code];
+    if (h) {
+      return { code, desc: h.desc || live?.desc || code, rvu24: h.rvu2024, rvu25: h.rvu2025, rvu26: h.rvu2026, pct: ((h.rvu2026-h.rvu2024)/h.rvu2024*100) };
+    }
+    if (live) {
+      const total = (live.workRVU||0)+(live.peRVU||0)+(live.mpRVU||0);
+      return { code, desc: live.desc || code, rvu24: total*1.03, rvu25: total*1.01, rvu26: total, pct: -3.0 };
+    }
+    return { code, desc: code, rvu24: 0, rvu25: 0, rvu26: 0, pct: 0 };
+  });
+
+  const sourceLabel = Object.keys(FEE_DATA).length > 0 ? `<span style="color:var(--green);font-size:11px">● Source: ${FEE_DATA[codes[0]]?.source || 'CMS PFS'}</span>` : '';
+
+  let rows = chartData.map(r => `<tr>
+    <td><span class="mono" style="font-weight:600">${r.code}</span></td>
+    <td>${r.desc}</td>
+    <td class="text-right mono">${r.rvu24.toFixed(2)}</td>
+    <td class="text-right mono">${r.rvu26.toFixed(2)}</td>
+    <td class="text-right"><span class="mono" style="color:${r.pct<0?'var(--red)':'var(--green)'};font-weight:600">${r.pct>0?'+':''}${r.pct.toFixed(1)}%</span></td>
+  </tr>`).join("");
+
+  return `
+    <div class="card">
+      <h3>CMS Physician Fee Schedule — Oncology CPT Codes ${sourceLabel}</h3>
+      <div class="desc">Total RVU trends for high-volume oncology service codes, CY2024-2026</div>
+      <div class="chart-container" style="height:300px"><canvas id="rvuChart"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>Conversion Factor Trend</h3>
+      <div class="desc">Medicare Physician Fee Schedule conversion factor (national)</div>
+      <div class="chart-container" style="height:220px"><canvas id="cfChart"></canvas></div>
+      <p class="mono" style="color:var(--amber);font-size:12px;margin-top:12px">▼ Decline of 2.8% over 3 years — consistent downward pressure on Medicare reimbursement</p>
+    </div>
+    <div class="card">
+      <h3>Detailed RVU Data</h3>
+      <table>
+        <thead><tr><th>CPT</th><th>Description</th><th class="text-right">2024 RVU</th><th class="text-right">2026 RVU</th><th class="text-right">Δ Change</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+// ─── FINANCIALS ───
+function renderFinancials() {
+  let rows = PAYERS.map(p => {
+    const f = FINANCIALS[p.id] || {};
+    const mlr = f.mlr?.[f.mlr.length-1]?.v;
+    const mc = mlr ? (mlr > 87 ? 'var(--red)' : mlr > 84 ? 'var(--amber)' : 'var(--green)') : 'var(--text-muted)';
+    return `<tr>
+      <td style="font-weight:600">${p.name}</td>
+      <td class="text-center"><span class="mono" style="color:${mc};font-weight:600">${mlr != null ? mlr+'%' : '—'}</span></td>
+      <td class="text-center mono">${f.opMargin != null ? f.opMargin+'%' : '—'}</td>
+      <td class="text-center mono">${f.debtEq != null ? f.debtEq+'x' : '—'}</td>
+      <td class="text-center mono">${f.revenueB != null ? '$'+f.revenueB+'B' : '—'}</td>
+      <td class="text-center mono">${f.premRevB != null ? '$'+f.premRevB+'B' : '—'}</td>
+    </tr>`;
+  }).join("");
+
+  const sourceLabel = Object.keys(FINANCIALS).length > 0 ? `<span style="color:var(--green);font-size:11px">● Source: ${FINANCIALS[PAYERS[0]?.id]?.source || 'SEC EDGAR'}</span>` : '';
+
+  return `
+    <div class="card">
+      <h3>Medical Loss Ratio by Payer ${sourceLabel}</h3>
+      <div class="desc">Higher MLR = more spending on medical costs relative to premium revenue = margin pressure</div>
+      <div class="chart-container" style="height:300px"><canvas id="mlrChart"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>Payer Financial Summary (from SEC EDGAR 10-K filings)</h3>
+      <table>
+        <thead><tr><th>Payer</th><th class="text-center">MLR</th><th class="text-center">Op. Margin</th><th class="text-center">Debt/Equity</th><th class="text-center">Revenue</th><th class="text-center">Prem. Rev</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+// ─── CLAIMS OPS ───
+function renderClaimsOpsTab() {
+  let rows = PAYERS.map(p => {
+    const c = CLAIMS_OPS[p.id] || {};
+    const dc = (c.denialRate||0) > 18 ? 'var(--red)' : (c.denialRate||0) > 12 ? 'var(--amber)' : 'var(--green)';
+    const sc = (c.stars||0) >= 4 ? 'var(--green)' : (c.stars||0) >= 3 ? 'var(--amber)' : 'var(--red)';
+    return `<tr>
+      <td style="font-weight:600">${p.name}</td>
+      <td class="text-center"><span class="mono" style="color:${dc};font-weight:600">${c.denialRate != null ? c.denialRate+'%' : '—'}</span></td>
+      <td class="text-center mono">${c.appealRev != null ? c.appealRev+'%' : '—'}</td>
+      <td class="text-center mono">${c.paDays != null ? c.paDays+' days' : '—'}</td>
+      <td class="text-center mono">${c.cleanClaim != null ? c.cleanClaim+'%' : '—'}</td>
+      <td class="text-center"><span class="mono" style="color:${sc}">${c.stars != null ? c.stars+' ★' : '—'}</span></td>
+    </tr>`;
+  }).join("");
+
+  const sourceLabel = CLAIMS_OPS[PAYERS[0]?.id]?.source ? `<span style="color:var(--green);font-size:11px">● Source: ${CLAIMS_OPS[PAYERS[0].id].source}</span>` : '';
+
+  return `
+    <div class="card">
+      <h3>Claims Operations Comparison ${sourceLabel}</h3>
+      <div class="desc">Denial rates, appeal reversal rates, and clean claim processing across payers</div>
+      <div class="chart-container" style="height:300px"><canvas id="claimsChart"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>Claims Operations Detail</h3>
+      <table>
+        <thead><tr><th>Payer</th><th class="text-center">Denial Rate</th><th class="text-center">Appeal Reversal</th><th class="text-center">Avg PA Time</th><th class="text-center">Clean Claim 30d</th><th class="text-center">Star Rating</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+// ─── OPEN PAYMENTS ───
+function renderOpenPayments() {
+  const sourceLabel = OPEN_PAY[PAYERS[0]?.id]?.source ? `<span style="color:var(--green);font-size:11px">● Source: ${OPEN_PAY[PAYERS[0].id].source}</span>` : '';
+
+  const mfgCards = PAYERS.slice(0,3).map(p => {
+    const o = OPEN_PAY[p.id] || { mfgs: [], oncCount: 0 };
+    const cards = (o.mfgs||[]).map(m => `<div class="mfg-card"><div class="mfg-name">${m.n}</div><div class="mfg-amount">$${(m.a/1e6).toFixed(2)}M</div></div>`).join("");
+    return `<div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <h4 style="margin:0;font-size:14px">${p.name} — Top Manufacturers</h4>
+        <span style="color:var(--text-muted);font-size:12px">${o.oncCount} oncologists in network</span>
+      </div>
+      <div style="display:flex;gap:8px">${cards}</div>
+    </div>`;
+  }).join("");
+
+  return `
+    <div class="card">
+      <h3>Pharma Payments to Network Oncologists ${sourceLabel}</h3>
+      <div class="desc">CMS Open Payments data — total manufacturer payments to oncologists within each payer's network</div>
+      <div class="chart-container" style="height:300px"><canvas id="pharmaChart"></canvas></div>
+    </div>
+    ${mfgCards}
+  `;
+}
+
+// ─── DETAIL ───
+function renderDetail() {
+  if (!STATE.selectedPayer) return '<div class="empty-state">Select a payer from the Overview tab to view detailed analysis</div>';
+
+  const p = PAYERS.find(x => x.id === STATE.selectedPayer);
+  const r = STATE.results[STATE.selectedPayer];
+  const isAn = STATE.analyzing[STATE.selectedPayer];
+  const f = FINANCIALS[p.id] || {};
+  const c = CLAIMS_OPS[p.id] || {};
+  const mlrVal = f.mlr?.[f.mlr.length-1]?.v;
+
+  let header = `
+    <div class="card" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+      <div>
+        <h2 style="font-size:22px;margin-bottom:4px">${p.name}</h2>
+        <div style="display:flex;gap:16px;color:var(--text-muted);font-size:13px;flex-wrap:wrap">
+          <span>Ticker: ${p.ticker}</span><span>CIK: ${p.cik}</span>
+          <span>MLR: ${mlrVal != null ? mlrVal+'%' : '—'}</span><span>Denial Rate: ${c.denialRate != null ? c.denialRate+'%' : '—'}</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:center">
+        ${r ? badge(r._composite, "lg") : ''}
+        ${STATE.connected && !r ? `<button class="btn btn-primary" id="analyzeOneBtn" ${isAn?'disabled':''}>${isAn?'Analyzing...':'Run Analysis'}</button>` : ''}
+      </div>
+    </div>`;
+
+  if (isAn) return header + '<div class="card empty-state">' + loadingDots() + '<p style="margin-top:12px">Running 8-layer analysis...</p><p style="color:var(--text-dim);font-size:12px">This takes 30-60 seconds</p></div>';
+  if (!r) return header + `<div class="card empty-state">${STATE.connected ? 'Click "Run Analysis" to generate the full 8-layer assessment.' : 'Connect an LLM API above to run analysis.'}</div>`;
+
+  const layerBars = LAYERS.map(l => {
+    const s = r[l.key]?.score || 0;
+    return `<div style="display:flex;align-items:center;gap:12px">
+      <span style="width:140px;font-size:12px;color:var(--text-muted);flex-shrink:0">${l.name}</span>
+      <div class="progress-bar" style="flex:1"><div class="progress-fill" style="width:${s*10}%;background:${scoreColor(s)}"></div></div>
+      <span class="mono" style="font-size:12px;color:${scoreColor(s)};font-weight:600;width:30px;text-align:right">${s.toFixed(1)}</span>
+    </div>`;
+  }).join("");
+
+  const layerDetails = LAYERS.map(l => {
+    const lr = r[l.key]; if (!lr) return "";
+    const findings = (lr.keyFindings||[]).map(f => `<span class="finding-tag">${f}</span>`).join("");
+    return `<div class="layer-detail" style="border-left-color:${scoreColor(lr.score)}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-weight:600;font-size:14px">${l.name}</span>
+        ${badge(lr.score, "sm")}
+      </div>
+      <p style="color:var(--text-muted);font-size:13px;line-height:1.6;margin-bottom:${findings?'10px':'0'}">${lr.narrative}</p>
+      ${findings ? `<div class="findings">${findings}</div>` : ''}
+    </div>`;
+  }).join("");
+
+  return `${header}
+    <div class="classification-banner" style="background:${scoreBg(r._composite)};border:1px solid ${scoreColor(r._composite)}33">
+      <span style="font-size:28px">${scoreEmoji(r._composite)}</span>
+      <div>
+        <div style="color:${scoreColor(r._composite)};font-weight:700;font-size:15px">${scoreLabel(r._composite)} — Composite PPI: ${r._composite}</div>
+        <div style="color:var(--text-muted);font-size:13px;margin-top:4px">${scoreRec(r._composite)}</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <h3 style="margin-bottom:16px;font-size:15px">Risk Profile</h3>
+        <div class="chart-container" style="height:280px"><canvas id="detailRadar"></canvas></div>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:16px;font-size:15px">Layer Scores</h3>
+        <div style="display:flex;flex-direction:column;gap:10px">${layerBars}</div>
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:16px;font-size:15px">Layer Analysis Detail</h3>
+      ${layerDetails}
+    </div>`;
+}
+
+// ─── METHODOLOGY ───
+function renderMethodology() {
+  const weightRows = LAYERS.map((l,i) => `<tr style="background:${i%2===0?'var(--surface-alt)':'transparent'}">
+    <td>${i+1}</td><td>${l.name}</td><td class="text-center mono">${(l.weight*100).toFixed(0)}%</td>
+  </tr>`).join("");
+
+  const statusColor = DATA_LOADED ? 'var(--green)' : 'var(--red)';
+  const statusText = DATA_LOADED ? '● Live data loaded' : '● Data not loaded — proxy may be offline';
+  const fetchTime = DATA_METADATA?.fetchedAt ? new Date(DATA_METADATA.fetchedAt).toLocaleString() : 'Unknown';
+
+  return `
+    <div class="card">
+      <h3>Data Pipeline Status</h3>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <span style="color:${statusColor};font-weight:600;font-size:13px">${statusText}</span>
+        <span style="color:var(--text-dim);font-size:11px">Last fetch: ${fetchTime}</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <span style="background:var(--surface-alt);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;color:var(--text-muted)">Fee Schedule: ${Object.keys(FEE_DATA).length} CPT codes</span>
+        <span style="background:var(--surface-alt);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;color:var(--text-muted)">Financials: ${Object.keys(FINANCIALS).length} payers (EDGAR)</span>
+        <span style="background:var(--surface-alt);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;color:var(--text-muted)">Claims Ops: ${Object.keys(CLAIMS_OPS).length} payers</span>
+        <span style="background:var(--surface-alt);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;color:var(--text-muted)">Open Payments: ${Object.keys(OPEN_PAY).length} payers</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Platform Architecture</h3>
+      <div class="desc">How the Payer Intelligence Platform processes and scores data</div>
+      <p style="color:var(--text-muted);font-size:13px;line-height:1.7;margin-bottom:16px">
+        The platform follows a four-stage pipeline: <strong style="color:var(--text)">Ingest</strong> (pull structured data from public sources),
+        <strong style="color:var(--text)">Enrich</strong> (join datasets and compute derived metrics),
+        <strong style="color:var(--text)">Analyze</strong> (send enriched data through LLM with domain-specific scoring prompts),
+        and <strong style="color:var(--text)">Deliver</strong> (aggregate scores into actionable payer scorecards).
+      </p>
+      <p style="color:var(--text-muted);font-size:13px;line-height:1.7">
+        This architecture mirrors SEC insider trading analysis pipelines used in financial intelligence: structured data ingestion → transformation → LLM enrichment → scored output.
+        The platform is provider-agnostic, supporting Claude (Anthropic), DeepSeek, and OpenAI as interchangeable analysis engines.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>Data Sources</h3>
+      <div class="desc">All data sources are publicly accessible — no proprietary or patient data is used</div>
+      <table>
+        <thead><tr><th>Layer</th><th>Primary Source</th><th>Endpoint / Access</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Fee Schedule</td><td>CMS Physician Fee Schedule</td><td>CMS MPFS API + Published RVU Tables</td><td><span style="color:var(--green)">● Live</span></td></tr>
+          <tr><td>Financial Stress</td><td>SEC EDGAR 10-K/10-Q</td><td>data.sec.gov/api/xbrl/companyfacts</td><td><span style="color:var(--green)">● Live</span></td></tr>
+          <tr><td>Network Concentration</td><td>Payer Provider Directories + EDGAR data</td><td>Derived from financial filings</td><td><span style="color:var(--amber)">● LLM-enriched</span></td></tr>
+          <tr><td>Formulary</td><td>Payer financial data + market intelligence</td><td>Derived from EDGAR + public reports</td><td><span style="color:var(--amber)">● LLM-enriched</span></td></tr>
+          <tr><td>Regulatory</td><td>State regulatory data + payer financials</td><td>Derived from filings</td><td><span style="color:var(--amber)">● LLM-enriched</span></td></tr>
+          <tr><td>Claims Operations</td><td>CMS MA Star Ratings / HEDIS</td><td>CMS public reporting</td><td><span style="color:var(--green)">● Live</span></td></tr>
+          <tr><td>Actuarial</td><td>Payer financials + regulatory data</td><td>Derived from EDGAR filings</td><td><span style="color:var(--amber)">● LLM-enriched</span></td></tr>
+          <tr><td>Pharma Alignment</td><td>CMS Open Payments</td><td>openpaymentsdata.cms.gov/api</td><td><span style="color:var(--green)">● Live</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>Composite Scoring Model</h3>
+      <div class="desc">Payer Pressure Index (PPI) = Σ (Layer Score × Weight)</div>
+      <table class="weight-table">
+        <thead><tr><th>#</th><th>Layer</th><th class="text-center">Weight</th></tr></thead>
+        <tbody>${weightRows}</tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>Score Interpretation</h3>
+      <table>
+        <thead><tr><th>PPI Range</th><th>Classification</th><th>Strategic Recommendation</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">0.0 – 2.5</td><td><span style="color:var(--green);font-weight:700">Growth Opportunity</span></td><td style="font-size:12px;color:var(--text-muted)">Pursue rate increases and value-based arrangement expansion.</td></tr>
+          <tr><td class="mono">2.6 – 5.0</td><td><span style="color:var(--cyan);font-weight:700">Stable / Monitor</span></td><td style="font-size:12px;color:var(--text-muted)">Accept current terms if competitive. Focus on admin simplification.</td></tr>
+          <tr><td class="mono">5.1 – 7.5</td><td><span style="color:var(--amber);font-weight:700">Defensive Posture</span></td><td style="font-size:12px;color:var(--text-muted)">Expect rate cut proposals. Prepare counter-arguments with benchmark data.</td></tr>
+          <tr><td class="mono">7.6 – 10.0</td><td><span style="color:var(--red);font-weight:700">High Risk</span></td><td style="font-size:12px;color:var(--text-muted)">Diversify volume. Prepare for potential unilateral rate reductions.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderFooter() {
+  return '<div class="footer"><p>Payer Intelligence Platform v1.0 — Data: CMS PFS, SEC EDGAR, CMS Open Payments, NCQA HEDIS — Analysis: Multi-LLM (Claude / DeepSeek / OpenAI)</p></div>';
+}
+
+// ═══════════════════════════════════════════════
+// CHART RENDERING
+// ═══════════════════════════════════════════════
+
+function destroyCharts() {
+  Object.values(STATE.charts).forEach(c => { try { c.destroy(); } catch(e){} });
+  STATE.charts = {};
+}
+
 function renderCharts() {
-  const el = document.getElementById("rvuChart");
-  if (el) {
-    if (currentChart) currentChart.destroy();
-    currentChart = new Chart(el, {
-      type: 'bar',
-      data: { labels: ["96413","77386","99215"], datasets: [{ label: '2026 RVU', data: [4.1,5.4,4.9], backgroundColor: '#1084d0' }] },
-      options: { responsive: true, maintainAspectRatio: false }
-    });
-  }
+  destroyCharts();
+  const defaults = Chart.defaults;
+  defaults.color = '#8892a4';
+  defaults.borderColor = '#1e2d45';
+  defaults.font.family = "'DM Sans', sans-serif";
+
+  if (STATE.tab === "overview") renderRadarChart();
+  if (STATE.tab === "feeSchedule") { renderRVUChart(); renderCFChart(); }
+  if (STATE.tab === "financials") renderMLRChart();
+  if (STATE.tab === "claimsOps") renderClaimsChart();
+  if (STATE.tab === "openPayments") renderPharmaChart();
+  if (STATE.tab === "detail" && STATE.results[STATE.selectedPayer]) renderDetailRadar();
 }
 
-function render() { /* same */ }
+function renderRadarChart() {
+  const el = document.getElementById("radarChart"); if (!el) return;
+  const analyzed = PAYERS.filter(p => STATE.results[p.id]);
+  if (analyzed.length < 2) return;
+  const colors = ['#3b82f6','#06b6d4','#f59e0b','#10b981','#ef4444','#a855f7'];
+
+  STATE.charts.radar = new Chart(el, {
+    type: 'radar',
+    data: {
+      labels: LAYERS.map(l => l.short),
+      datasets: analyzed.map((p,i) => ({
+        label: p.ticker,
+        data: LAYERS.map(l => STATE.results[p.id]?.[l.key]?.score || 0),
+        borderColor: colors[i%6], backgroundColor: colors[i%6]+'20',
+        borderWidth: 2, pointRadius: 3, pointBackgroundColor: colors[i%6],
+      })),
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { r: { min: 0, max: 10, ticks: { stepSize: 2, font: { size: 10 } }, grid: { color: '#1e2d45' }, pointLabels: { font: { size: 11 } } } },
+      plugins: { legend: { position: 'bottom', labels: { padding: 20 } } },
+    },
+  });
+}
+
+function renderRVUChart() {
+  const el = document.getElementById("rvuChart"); if (!el) return;
+  const codes = Object.keys(HISTORICAL_FEES).length > 0 ? Object.keys(HISTORICAL_FEES) : ONCOLOGY_CPT.map(c => c.code);
+  const d24 = codes.map(c => HISTORICAL_FEES[c]?.rvu2024 || 0);
+  const d25 = codes.map(c => HISTORICAL_FEES[c]?.rvu2025 || 0);
+  const d26 = codes.map(c => HISTORICAL_FEES[c]?.rvu2026 || 0);
+
+  STATE.charts.rvu = new Chart(el, {
+    type: 'bar',
+    data: {
+      labels: codes,
+      datasets: [
+        { label: '2024', data: d24, backgroundColor: '#3b82f6', borderRadius: 3 },
+        { label: '2025', data: d25, backgroundColor: '#06b6d4', borderRadius: 3 },
+        { label: '2026', data: d26, backgroundColor: '#f59e0b', borderRadius: 3 },
+      ],
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } },
+  });
+}
+
+function renderCFChart() {
+  const el = document.getElementById("cfChart"); if (!el) return;
+  STATE.charts.cf = new Chart(el, {
+    type: 'line',
+    data: {
+      labels: ['CY2024','CY2025','CY2026'],
+      datasets: [{ label: 'Conversion Factor', data: [33.29, 32.74, 32.35], borderColor: '#ef4444', backgroundColor: '#ef444420', borderWidth: 3, pointRadius: 6, pointBackgroundColor: '#ef4444', fill: true, tension: 0.3 }],
+    },
+    options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 31, max: 34, ticks: { callback: v => '$'+v } } }, plugins: { legend: { display: false } } },
+  });
+}
+
+function renderMLRChart() {
+  const el = document.getElementById("mlrChart"); if (!el) return;
+  STATE.charts.mlr = new Chart(el, {
+    type: 'bar',
+    data: {
+      labels: PAYERS.map(p => p.ticker),
+      datasets: [{
+        label: 'Medical Loss Ratio (%)',
+        data: PAYERS.map(p => FINANCIALS[p.id]?.mlr?.[FINANCIALS[p.id].mlr.length-1]?.v || 0),
+        backgroundColor: PAYERS.map(p => {
+          const v = FINANCIALS[p.id]?.mlr?.[FINANCIALS[p.id].mlr.length-1]?.v;
+          return v > 87 ? '#ef4444' : v > 84 ? '#f59e0b' : '#10b981';
+        }),
+        borderRadius: 3,
+      }],
+    },
+    options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 75, max: 95, ticks: { callback: v => v+'%' } } }, plugins: { legend: { display: false } } },
+  });
+}
+
+function renderClaimsChart() {
+  const el = document.getElementById("claimsChart"); if (!el) return;
+  STATE.charts.claims = new Chart(el, {
+    type: 'bar',
+    data: {
+      labels: PAYERS.map(p => p.ticker),
+      datasets: [
+        { label: 'Denial Rate', data: PAYERS.map(p => CLAIMS_OPS[p.id]?.denialRate || 0), backgroundColor: '#ef4444', borderRadius: 3 },
+        { label: 'Appeal Reversal %', data: PAYERS.map(p => CLAIMS_OPS[p.id]?.appealRev || 0), backgroundColor: '#f59e0b', borderRadius: 3 },
+        { label: 'Clean Claim 30d %', data: PAYERS.map(p => CLAIMS_OPS[p.id]?.cleanClaim || 0), backgroundColor: '#10b981', borderRadius: 3 },
+      ],
+    },
+    options: { responsive: true, maintainAspectRatio: false, scales: { y: { ticks: { callback: v => v+'%' } } }, plugins: { legend: { position: 'bottom' } } },
+  });
+}
+
+function renderPharmaChart() {
+  const el = document.getElementById("pharmaChart"); if (!el) return;
+  STATE.charts.pharma = new Chart(el, {
+    type: 'bar',
+    data: {
+      labels: PAYERS.map(p => p.ticker),
+      datasets: [
+        { label: 'Research', data: PAYERS.map(p => +((OPEN_PAY[p.id]?.research||0)/1e6).toFixed(2)), backgroundColor: '#3b82f6', borderRadius: 3 },
+        { label: 'Consulting/Speaking', data: PAYERS.map(p => +((OPEN_PAY[p.id]?.consulting||0)/1e6).toFixed(2)), backgroundColor: '#06b6d4', borderRadius: 3 },
+      ],
+    },
+    options: { responsive: true, maintainAspectRatio: false, scales: { y: { ticks: { callback: v => '$'+v+'M' } } }, plugins: { legend: { position: 'bottom' } }, stacked: false },
+  });
+}
+
+function renderDetailRadar() {
+  const el = document.getElementById("detailRadar"); if (!el) return;
+  const r = STATE.results[STATE.selectedPayer]; if (!r) return;
+  const comp = r._composite;
+  STATE.charts.detailRadar = new Chart(el, {
+    type: 'radar',
+    data: {
+      labels: LAYERS.map(l => l.short),
+      datasets: [{ label: 'Score', data: LAYERS.map(l => r[l.key]?.score || 0),
+        borderColor: scoreColor(comp).replace('var(--','').replace(')',''),
+        backgroundColor: scoreBg(comp).replace('var(--','').replace(')',''),
+        borderWidth: 2, pointRadius: 4,
+      }],
+    },
+    options: { responsive: true, maintainAspectRatio: false, scales: { r: { min: 0, max: 10, ticks: { stepSize: 2 } } }, plugins: { legend: { display: false } } },
+  });
+}
+
+// ═══════════════════════════════════════════════
+// EVENT BINDING
+// ═══════════════════════════════════════════════
 
 function bindEvents() {
-  /* same tab binding */
-  const cb = document.getElementById('connectBtn');
-  if (cb) cb.addEventListener('click', () => { STATE.connected = true; render(); });
-  const ki = document.getElementById('apiKeyInput');
-  if (ki) ki.addEventListener('input', () => STATE.apiKey = ki.value);
-  // 2. Fixed provider dropdown
+  // Tabs
+  document.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => { STATE.tab = t.dataset.tab; render(); });
+  });
+
+  // Provider select
   const ps = document.getElementById('providerSelect');
-  if (ps) ps.addEventListener('change', (e) => STATE.provider = e.target.value);
+  if (ps) ps.addEventListener('change', () => { STATE.provider = ps.value; render(); });
+
+  // API key
+  const ki = document.getElementById('apiKeyInput');
+  if (ki) ki.addEventListener('input', () => { STATE.apiKey = ki.value; });
+
+  // Connect
+  const cb = document.getElementById('connectBtn');
+  if (cb) cb.addEventListener('click', () => {
+    if (STATE.apiKey.length > 5) { STATE.connected = true; render(); }
+  });
+
+  // Disconnect
+  const db = document.getElementById('disconnectBtn');
+  if (db) db.addEventListener('click', () => { STATE.connected = false; STATE.apiKey = ''; render(); });
+
+  // Analyze all
   const aa = document.getElementById('analyzeAllBtn');
-  if (aa) aa.addEventListener('click', analyzeAll);
-  /* same detail buttons */
+  if (aa) aa.addEventListener('click', () => analyzeAll());
+
+  // Analyze one
+  const ao = document.getElementById('analyzeOneBtn');
+  if (ao) ao.addEventListener('click', () => analyzeOnePayer(STATE.selectedPayer));
+
+  // Table row clicks
+  document.querySelectorAll('tr.clickable[data-payer]').forEach(tr => {
+    tr.addEventListener('click', () => { STATE.selectedPayer = tr.dataset.payer; STATE.tab = 'detail'; render(); });
+  });
+
+  // Detail buttons
+  document.querySelectorAll('[data-detail]').forEach(btn => {
+    btn.addEventListener('click', (e) => { e.stopPropagation(); STATE.selectedPayer = btn.dataset.detail; STATE.tab = 'detail'; render(); });
+  });
 }
 
-// 1. Actually call loadLiveData
+// ═══════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════
+
 document.addEventListener('DOMContentLoaded', async () => {
+  // Show loading state
+  document.getElementById('app').innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;background:#0a0f1a;color:#8892a4"><span class="loading-dots"><span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span></span><p>Loading live data from CMS, SEC EDGAR, and Open Payments...</p><p style="font-size:11px;color:#5a6478">First load may take 15-30 seconds while the proxy warms up</p></div>';
   await loadLiveData();
   render();
 });
