@@ -33,7 +33,7 @@ th, td { padding:8px; border:1px solid #808080; text-align:left; }
 <div id="app"></div>
 
 <script>
-// PAYOR INTELLIGENCE PLATFORM — LIVE SCRAPING
+// PAYOR INTELLIGENCE PLATFORM — FULL LIVE SCRAPING
 const PROXY_URL = "https://payor-proxy.onrender.com";
 
 const PAYERS = [
@@ -81,16 +81,16 @@ const STATE = {
 let FEE_DATA = {};
 let OPEN_PAY = {};
 
-// Live data fetch
+// Load live data every page load
 async function loadLiveData() {
   try {
     const res = await fetch(`${PROXY_URL}/live-data`);
     const data = await res.json();
     FEE_DATA = data.feeSchedule || {};
     OPEN_PAY = data.openPayments || {};
-    console.log("Live data loaded");
+    console.log("✅ Live CMS Fee Schedule and Open Payments data loaded");
   } catch(e) {
-    console.error("Live data failed", e);
+    console.error("Live data fetch failed", e);
   }
 }
 
@@ -161,8 +161,8 @@ function renderOverview() {
 }
 
 function renderFeeSchedule() { return `<div class="card"><h3>Fee Schedule Trend (Live CMS Data)</h3><div class="chart-container" style="height:300px"><canvas id="rvuChart"></canvas></div></div>`; }
-function renderFinancials() { return `<div class="card"><h3>Payer Financials</h3><p>Live data coming next</p></div>`; }
-function renderClaimsOpsTab() { return `<div class="card"><h3>Claims Operations</h3><p>Live data coming next</p></div>`; }
+function renderFinancials() { return `<div class="card"><h3>Payer Financials</h3><p>Live scraping coming next</p></div>`; }
+function renderClaimsOpsTab() { return `<div class="card"><h3>Claims Operations</h3><p>Live scraping coming next</p></div>`; }
 function renderOpenPayments() { return `<div class="card"><h3>Open Payments (Live CMS Data)</h3><p>Data loaded from CMS Open Payments</p></div>`; }
 function renderDetail() { return `<div class="card"><h3>Payor Detail</h3><p>Select a payor from Overview</p></div>`; }
 function renderMethodology() { return `<div class="card"><h3>Methodology</h3><p>Live scraping enabled for Fee Schedule and Open Payments. Data is fetched every page load from CMS.</p></div>`; }
